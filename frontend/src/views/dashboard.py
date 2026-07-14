@@ -1,8 +1,8 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
 import pandas as pd
-from src.core.interfaces import IView, ICandidateRepository, IInterviewRepository
-from src.components.widgets import hero, section_header
+from backend.core.interfaces import IView, ICandidateRepository, IInterviewRepository
+from frontend.src.components.widgets import hero, section_header
 
 
 class DashboardView(IView):

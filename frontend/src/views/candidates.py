@@ -1,8 +1,8 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
 import pandas as pd
-from src.core.interfaces import IView, ICandidateRepository
-from src.components.widgets import hero, section_header, handle_placeholder_button
+from backend.core.interfaces import IView, ICandidateRepository
+from frontend.src.components.widgets import hero, section_header, handle_placeholder_button
 
 
 class CandidatesView(IView):

@@ -1,6 +1,6 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
-from src.core.styles import (
+from frontend.src.core.styles import (
     DARK_TEXT,
     MUTED_TEXT,
     LIGHT_BLUE,

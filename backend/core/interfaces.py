@@ -34,6 +34,15 @@ class IInterviewRepository(ABC):
         pass
 
 
+class IEmployeeRepository(ABC):
+    """Abstraction for employee and workforce data access."""
+
+    @abstractmethod
+    def get_employees(self) -> pd.DataFrame:
+        """Retrieve current employee records."""
+        pass
+
+
 class IView(ABC):
     """Abstraction for renderable UI screens."""
 

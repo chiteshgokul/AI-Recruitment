@@ -1,9 +1,9 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
 import pandas as pd
-from src.core.interfaces import IView, IJobRepository
-from src.components.widgets import hero, status_pill, handle_placeholder_button
-from src.core.styles import MUTED_TEXT, DARK_TEXT
+from backend.core.interfaces import IView, IJobRepository
+from frontend.src.components.widgets import hero, status_pill, handle_placeholder_button
+from frontend.src.core.styles import MUTED_TEXT, DARK_TEXT
 
 
 class JobOpeningsView(IView):

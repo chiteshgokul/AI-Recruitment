@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import pandas as pd
 # pyrefly: ignore [missing-import]
 import streamlit as st
-from src.core.interfaces import ICandidateRepository, IJobRepository, IInterviewRepository
+from backend.core.interfaces import ICandidateRepository, IJobRepository, IInterviewRepository, IEmployeeRepository
 
 
 @st.cache_data
@@ -142,15 +142,56 @@ def _generate_sample_data() -> dict[str, pd.DataFrame]:
         ]
     )
 
+    employees = pd.DataFrame(
+        [
+            {
+                "Name": "Aarav Mehta",
+                "Department": "Engineering",
+                "Tenure": "3.5 years",
+                "Skills": "Python, AWS, Django",
+                "Flight Risk": "Low",
+            },
+            {
+                "Name": "Sophia Carter",
+                "Department": "Design",
+                "Tenure": "1.2 years",
+                "Skills": "Figma, UX Research",
+                "Flight Risk": "High",
+            },
+            {
+                "Name": "Maya Rao",
+                "Department": "People",
+                "Tenure": "4.0 years",
+                "Skills": "Sourcing, SPHR",
+                "Flight Risk": "Medium",
+            },
+            {
+                "Name": "Isha Kapoor",
+                "Department": "Engineering",
+                "Tenure": "2.1 years",
+                "Skills": "React, TypeScript",
+                "Flight Risk": "Low",
+            },
+            {
+                "Name": "Ethan Brown",
+                "Department": "Sales",
+                "Tenure": "0.8 years",
+                "Skills": "CRM, Sales Strategy",
+                "Flight Risk": "High",
+            },
+        ]
+    )
+
     return {
         "candidates": pd.DataFrame(candidates),
         "applications": applications,
         "interviews": interviews,
         "jobs": jobs,
+        "employees": employees,
     }
 
 
-class MockDataRepository(ICandidateRepository, IJobRepository, IInterviewRepository):
+class MockDataRepository(ICandidateRepository, IJobRepository, IInterviewRepository, IEmployeeRepository):
     """Concrete repository using deterministic mock data generators."""
 
     def __init__(self) -> None:
@@ -167,3 +208,6 @@ class MockDataRepository(ICandidateRepository, IJobRepository, IInterviewReposit
 
     def get_interviews(self) -> pd.DataFrame:
         return self._data["interviews"]
+
+    def get_employees(self) -> pd.DataFrame:
+        return self._data["employees"]

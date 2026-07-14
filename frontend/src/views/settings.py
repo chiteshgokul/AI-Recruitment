@@ -1,8 +1,8 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
-from src.core.interfaces import IView
-from src.components.widgets import hero, section_header, handle_placeholder_button
-from src.core.styles import PRIMARY_BLUE
+from backend.core.interfaces import IView
+from frontend.src.components.widgets import hero, section_header, handle_placeholder_button
+from frontend.src.core.styles import PRIMARY_BLUE
 
 
 class SettingsView(IView):
