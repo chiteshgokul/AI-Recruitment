@@ -116,6 +116,53 @@ def inject_css() -> None:
                 font-weight: 700;
             }}
 
+            .fit-pro-item {{
+                background: #f0fdf4;
+                border-left: 4px solid #15803d;
+                padding: 8px 12px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                color: #166534;
+                font-size: 0.9rem;
+                font-weight: 500;
+                line-height: 1.4;
+            }}
+
+            .fit-con-item {{
+                background: #fef2f2;
+                border-left: 4px solid #b91c1c;
+                padding: 8px 12px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                color: #991b1b;
+                font-size: 0.9rem;
+                font-weight: 500;
+                line-height: 1.4;
+            }}
+
+            .email-container {{
+                background: #ffffff;
+                border: 1px solid {CARD_BORDER};
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+                font-family: 'Inter', sans-serif;
+                white-space: pre-wrap;
+                font-size: 0.95rem;
+                line-height: 1.6;
+                color: {DARK_TEXT};
+                min-height: 300px;
+            }}
+
+            .email-subject {{
+                font-weight: 700;
+                border-bottom: 1px solid {CARD_BORDER};
+                padding-bottom: 10px;
+                margin-bottom: 15px;
+                font-size: 1rem;
+                color: {DARK_TEXT};
+            }}
+
             .status-open, .status-active, .status-selected {{
                 color: #047857;
                 background: #ecfdf5;

@@ -12,6 +12,7 @@ from frontend.src.views.resume_screening import ResumeScreeningView
 from frontend.src.views.interviews import InterviewManagementView
 from frontend.src.views.talent import TalentManagementView
 from frontend.src.views.talent_insight import TalentInsightView
+from frontend.src.views.ai_mail_generator import AIMailGeneratorView
 from frontend.src.views.analytics import AnalyticsView
 from frontend.src.views.settings import SettingsView
 
@@ -37,6 +38,7 @@ def render_sidebar(is_ai_active: bool) -> None:
         "Job Openings",
         "Resume Screening",
         "Interview Management",
+        "AI Mail Generator",
         "Talent Management",
         "Talent Insight AI",
         "Analytics",
@@ -48,6 +50,7 @@ def render_sidebar(is_ai_active: bool) -> None:
         "Job Openings": "💼",
         "Resume Screening": "📄",
         "Interview Management": "🗓️",
+        "AI Mail Generator": "📨",
         "Talent Management": "🌱",
         "Talent Insight AI": "💡",
         "Analytics": "📈",
@@ -96,6 +99,7 @@ def main() -> None:
         "Job Openings": JobOpeningsView(job_repo=repo),
         "Resume Screening": ResumeScreeningView(job_repo=repo, ollama_client=ollama),
         "Interview Management": InterviewManagementView(interview_repo=repo, candidate_repo=repo, ollama_client=ollama),
+        "AI Mail Generator": AIMailGeneratorView(candidate_repo=repo, ollama_client=ollama),
         "Talent Management": TalentManagementView(ollama_client=ollama),
         "Talent Insight AI": TalentInsightView(employee_repo=repo, ollama_client=ollama),
         "Analytics": AnalyticsView(),

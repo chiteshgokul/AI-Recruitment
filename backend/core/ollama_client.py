@@ -75,11 +75,18 @@ class OllamaClient:
             clean_text = response_text.strip()
             if clean_text.startswith("```json"):
                 clean_text = clean_text[7:]
+            elif clean_text.startswith("```"):
+                clean_text = clean_text[3:]
             if clean_text.endswith("```"):
                 clean_text = clean_text[:-3]
             clean_text = clean_text.strip()
             
-            return json.loads(clean_text)
+            # Attempt to repair if raw json loads fails
+            try:
+                return json.loads(clean_text)
+            except Exception:
+                repaired = self._repair_json(clean_text)
+                return json.loads(repaired)
         except Exception:
             return {
                 "match_score": 50,
@@ -88,13 +95,122 @@ class OllamaClient:
                 "fit_notes": ["Please verify that your local Ollama server is running and the phi3 model is loaded."]
             }
 
+    def _repair_json(self, json_str: str) -> str:
+        """Attempt to repair common JSON syntax errors and truncations from LLM responses."""
+        json_str = json_str.strip()
+        if not json_str:
+            return "{}"
+
+        # Stack-based auto-closer
+        in_string = False
+        escape = False
+        stack = []
+        
+        repaired_chars = []
+        
+        for i, char in enumerate(json_str):
+            if escape:
+                escape = False
+                repaired_chars.append(char)
+                continue
+                
+            if char == '\\':
+                escape = True
+                repaired_chars.append(char)
+                continue
+                
+            if char == '"':
+                in_string = not in_string
+                repaired_chars.append(char)
+                continue
+                
+            if not in_string:
+                if char == '{':
+                    stack.append('}')
+                elif char == '[':
+                    stack.append(']')
+                elif char == '}':
+                    if stack and stack[-1] == '}':
+                        stack.pop()
+                elif char == ']':
+                    if stack and stack[-1] == ']':
+                        stack.pop()
+            
+            repaired_chars.append(char)
+            
+        if in_string:
+            if repaired_chars and repaired_chars[-1] == '\\':
+                repaired_chars.pop()
+            repaired_chars.append('"')
+            
+        temp_str = "".join(repaired_chars).strip()
+        while temp_str and temp_str[-1] in (',', ':', ' '):
+            temp_str = temp_str[:-1].strip()
+            
+        closing = []
+        for brace in reversed(stack):
+            closing.append(brace)
+            
+        repaired_json_str = temp_str + "".join(closing)
+        
+        try:
+            json.loads(repaired_json_str)
+            return repaired_json_str
+        except Exception:
+            pass
+            
+        # Drop trailing incomplete elements by splitting on last comma
+        if stack:
+            parts = temp_str.split(',')
+            if len(parts) > 1:
+                for j in range(len(parts) - 1, 0, -1):
+                    candidate_base = ",".join(parts[:j]).strip()
+                    c_stack = []
+                    c_in_string = False
+                    c_escape = False
+                    for c_char in candidate_base:
+                        if c_escape:
+                            c_escape = False
+                            continue
+                        if c_char == '\\':
+                            c_escape = True
+                            continue
+                        if c_char == '"':
+                            c_in_string = not c_in_string
+                            continue
+                        if not c_in_string:
+                            if c_char == '{':
+                                c_stack.append('}')
+                            elif c_char == '[':
+                                c_stack.append(']')
+                            elif c_char == '}':
+                                if c_stack and c_stack[-1] == '}':
+                                    c_stack.pop()
+                            elif c_char == ']':
+                                if c_stack and c_stack[-1] == ']':
+                                    c_stack.pop()
+                    if not c_in_string:
+                        candidate_closing = "".join(reversed(c_stack))
+                        candidate_json = candidate_base + candidate_closing
+                        try:
+                            json.loads(candidate_json)
+                            return candidate_json
+                        except Exception:
+                            pass
+
+        return repaired_json_str
+
     def generate_interview_questions(self, candidate_name: str, job_title: str, skills: str) -> str:
         """Generate custom interview questions for a candidate."""
         prompt = f"""
         Create a list of 5 targeted technical and behavioral interview questions for a candidate named {candidate_name} applying for the {job_title} role.
         The candidate has these key skills: {skills}.
-        Provide structured questions, each with a brief note explaining what to look for in the candidate's answer.
-        Keep the questions and notes concise and to-the-point to optimize local processing time.
+        
+        Requirements:
+        - The questions MUST be directly relevant to the target role of {job_title}.
+        - Do not ask questions about topics that are irrelevant to a {job_title} (e.g. if the role is a Product Designer, focus technical questions on Figma, design systems, prototyping, or UX research; do not ask software engineering/deep learning/NLP questions like React, Python, or data models unless they are explicitly applied to design workflows).
+        - Provide structured questions, each with a brief note explaining what to look for in the candidate's answer.
+        - Keep the questions and notes concise and to-the-point to optimize local processing time.
         """
         system_prompt = "You are a hiring manager. Generate concise, highly relevant interview questions."
         return self.generate(prompt, system=system_prompt)
@@ -123,4 +239,24 @@ class OllamaClient:
         Keep the analysis and recommendations concise and direct (use short bullet points) to optimize local processing speed.
         """
         system_prompt = "You are a retention specialist and HR strategist. Provide professional, structured, and concise workforce retention strategies."
+        return self.generate(prompt, system=system_prompt)
+
+    def generate_email(self, candidate_name: str, job_title: str, email_type: str, tone: str, extra_context: str) -> str:
+        """Generate a recruitment email for a candidate using specified tone and context."""
+        prompt = f"""
+        Draft a recruitment email to a candidate.
+        
+        Candidate Name: {candidate_name}
+        Job Title: {job_title}
+        Email Type: {email_type} (e.g. Interview Invitation, Job Offer, Rejection, Follow-up)
+        Tone: {tone} (e.g. Professional, Friendly, Encouraging, Direct)
+        Additional Context & Details: {extra_context}
+        
+        Requirements:
+        - Provide the Subject line first (starting with "Subject:").
+        - Then provide the Body of the email.
+        - Do not include bracketed placeholder text like [Your Name] or [Insert Date]; instead, write ready-to-send content with a professional placeholder sign-off if needed.
+        - Keep it clean, direct, and well-spaced.
+        """
+        system_prompt = "You are an expert recruitment assistant. Generate beautiful, professional, and ready-to-send emails."
         return self.generate(prompt, system=system_prompt)

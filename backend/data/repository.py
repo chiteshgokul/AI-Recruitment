@@ -42,9 +42,27 @@ def _generate_sample_data() -> dict[str, pd.DataFrame]:
     education_pool = ["Bachelor's", "Master's", "MBA", "PhD", "Diploma"]
     statuses = ["New", "In Review", "Interview", "Selected", "On Hold"]
 
+    role_skills_map = {
+        "AI Engineer": ["Python", "NLP", "LLMs", "AWS", "PyTorch", "SQL", "MLOps"],
+        "Product Designer": ["Figma", "UI/UX Design", "Wireframing", "Prototyping", "Design Systems", "User Research"],
+        "HR Analyst": ["People Analytics", "Tableau", "Power BI", "SQL", "Data Analysis", "Excel"],
+        "Backend Developer": ["Python", "Django", "SQL", "AWS", "REST APIs", "Git", "Docker"],
+        "Talent Partner": ["Recruiting", "Sourcing", "ATS", "Leadership", "Communication", "HR Strategy"],
+    }
+
     candidates = []
     for idx, name in enumerate(names):
-        candidate_skills = random.sample(skills_pool, k=random.randint(3, 5))
+        applied_role = random.choice(
+            [
+                "AI Engineer",
+                "HR Analyst",
+                "Product Designer",
+                "Backend Developer",
+                "Talent Partner",
+            ]
+        )
+        role_skills = role_skills_map[applied_role]
+        candidate_skills = random.sample(role_skills, k=min(random.randint(3, 4), len(role_skills)))
         candidates.append(
             {
                 "Name": name,
@@ -54,15 +72,7 @@ def _generate_sample_data() -> dict[str, pd.DataFrame]:
                 "Match Score": f"{random.randint(72, 98)}%",
                 "Status": random.choice(statuses),
                 "Resume": "View Resume",
-                "Applied Role": random.choice(
-                    [
-                        "AI Engineer",
-                        "HR Analyst",
-                        "Product Designer",
-                        "Backend Developer",
-                        "Talent Partner",
-                    ]
-                ),
+                "Applied Role": applied_role,
                 "Applied Date": (date.today() - timedelta(days=idx + random.randint(1, 14))).isoformat(),
             }
         )

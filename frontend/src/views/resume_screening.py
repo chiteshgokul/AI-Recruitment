@@ -131,10 +131,74 @@ class ResumeScreeningView(IView):
                 section_header("📋 Fit Assessment (Pros & Cons)", "Key hiring signals.")
                 if res:
                     notes = res.get("fit_notes", [])
-                    if isinstance(notes, list):
-                        for note in notes:
-                            st.markdown(f"• {note}")
+                    pros = []
+                    cons = []
+                    
+                    def parse_dict(d):
+                        d_pros = []
+                        d_cons = []
+                        for k, v in d.items():
+                            k_lower = str(k).lower()
+                            if "pro" in k_lower:
+                                if isinstance(v, list):
+                                    d_pros.extend(v)
+                                elif isinstance(v, str):
+                                    d_pros.append(v)
+                            elif "con" in k_lower or "weak" in k_lower:
+                                if isinstance(v, list):
+                                    d_cons.extend(v)
+                                elif isinstance(v, str):
+                                    d_cons.append(v)
+                        return d_pros, d_cons
+
+                    if isinstance(notes, dict):
+                        p, c = parse_dict(notes)
+                        pros.extend(p)
+                        cons.extend(c)
+                    elif isinstance(notes, list):
+                        for item in notes:
+                            if isinstance(item, dict):
+                                p, c = parse_dict(item)
+                                pros.extend(p)
+                                cons.extend(c)
+                            elif isinstance(item, str):
+                                item_lower = item.lower()
+                                if item_lower.startswith("pro:") or item_lower.startswith("pro -") or item_lower.startswith("pros:"):
+                                    pros.append(item.split(":", 1)[-1].strip())
+                                elif item_lower.startswith("con:") or item_lower.startswith("con -") or item_lower.startswith("cons:"):
+                                    cons.append(item.split(":", 1)[-1].strip())
+                                elif "pro" in item_lower and ":" in item:
+                                    pros.append(item.split(":", 1)[-1].strip())
+                                elif "con" in item_lower and ":" in item:
+                                    cons.append(item.split(":", 1)[-1].strip())
+                                else:
+                                    negatives = ["lack", "missing", "no ", "not ", "weakness", "con:", "con -", "fail", "without"]
+                                    if any(neg in item_lower for neg in negatives):
+                                        cons.append(item)
+                                    else:
+                                        pros.append(item)
+
+                    if pros or cons:
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown("**👍 Pros / Strengths**")
+                            if pros:
+                                for pro in pros:
+                                    st.markdown(f'<div class="fit-pro-item">✓ {pro}</div>', unsafe_allow_html=True)
+                            else:
+                                st.caption("No specific pros highlighted.")
+                        with col2:
+                            st.markdown("**👎 Cons / Areas of Concern**")
+                            if cons:
+                                for con in cons:
+                                    st.markdown(f'<div class="fit-con-item">✗ {con}</div>', unsafe_allow_html=True)
+                            else:
+                                st.caption("No specific cons highlighted.")
                     else:
-                        st.write(notes)
+                        if isinstance(notes, list):
+                            for note in notes:
+                                st.markdown(f"• {note}")
+                        else:
+                            st.write(notes)
                 else:
                     st.caption("Pros, cons, and alignment notes will appear here after screening.")
