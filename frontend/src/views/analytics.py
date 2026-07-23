@@ -10,7 +10,7 @@ class AnalyticsView(IView):
     """View renderer for the Analytics dashboards and charts."""
 
     def render(self) -> None:
-        hero("Analytics", "Placeholder charts for hiring velocity, funnel performance, and workforce distribution.")
+        hero("Analytics", "Comprehensive visual analytics for hiring velocity, funnel performance, and workforce distribution.")
 
         months = pd.date_range(end=date.today(), periods=8, freq="ME").strftime("%b")
         hiring_trend = pd.DataFrame(

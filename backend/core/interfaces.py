@@ -15,6 +15,10 @@ class ICandidateRepository(ABC):
         """Retrieve recent applications."""
         pass
 
+    def update_candidate_status(self, candidate_name: str, new_status: str) -> None:
+        """Update a candidate's status."""
+        pass
+
 
 class IJobRepository(ABC):
     """Abstraction for job openings data access."""
@@ -24,6 +28,14 @@ class IJobRepository(ABC):
         """Retrieve job openings."""
         pass
 
+    def update_job_status(self, job_title: str, new_status: str) -> None:
+        """Update job status."""
+        pass
+
+    def add_job(self, job_dict: dict) -> None:
+        """Add a new job opening."""
+        pass
+
 
 class IInterviewRepository(ABC):
     """Abstraction for interview schedule data access."""
@@ -31,6 +43,10 @@ class IInterviewRepository(ABC):
     @abstractmethod
     def get_interviews(self) -> pd.DataFrame:
         """Retrieve scheduled interviews."""
+        pass
+
+    def add_interview(self, interview_dict: dict) -> None:
+        """Add a new scheduled interview."""
         pass
 
 

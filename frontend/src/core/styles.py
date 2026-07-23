@@ -214,6 +214,49 @@ def inject_css() -> None:
                 border-radius: 16px;
                 overflow: hidden;
             }}
+
+            .question-card {{
+                background: #ffffff;
+                border: 1px solid {CARD_BORDER};
+                border-left: 4px solid {PRIMARY_BLUE};
+                border-radius: 14px;
+                padding: 16px 20px;
+                margin-bottom: 14px;
+                box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+                word-wrap: break-word;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                white-space: normal;
+                max-width: 100%;
+                box-sizing: border-box;
+            }}
+
+            .question-title {{
+                font-weight: 750;
+                font-size: 1.02rem;
+                color: {DARK_TEXT};
+                margin-bottom: 6px;
+                line-height: 1.5;
+                word-wrap: break-word;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                white-space: normal;
+            }}
+
+            .question-note {{
+                font-size: 0.88rem;
+                color: {MUTED_TEXT};
+                background: {LIGHT_BLUE};
+                border: 1px solid {MID_BLUE};
+                padding: 10px 14px;
+                border-radius: 10px;
+                margin-top: 8px;
+                line-height: 1.5;
+                word-wrap: break-word;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                white-space: normal;
+            }}
         </style>
         """,
         unsafe_allow_html=True,

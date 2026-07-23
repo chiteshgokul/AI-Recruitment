@@ -202,22 +202,79 @@ def _generate_sample_data() -> dict[str, pd.DataFrame]:
 
 
 class MockDataRepository(ICandidateRepository, IJobRepository, IInterviewRepository, IEmployeeRepository):
-    """Concrete repository using deterministic mock data generators."""
+    """Concrete repository using session state for stateful data access and mutations."""
 
     def __init__(self) -> None:
-        self._data = _generate_sample_data()
+        if "repo_data" not in st.session_state:
+            st.session_state.repo_data = _generate_sample_data()
+        if "activities" not in st.session_state:
+            st.session_state.activities = [
+                "New resume uploaded for Senior AI Engineer.",
+                "Interview feedback submitted for Maya Rao.",
+                "Offer approved for Product Designer role.",
+                "Skill gap report refreshed for Engineering team.",
+                "Candidate shortlist updated for HR Analyst.",
+            ]
 
     def get_candidates(self) -> pd.DataFrame:
-        return self._data["candidates"]
+        return st.session_state.repo_data["candidates"]
+
+    def update_candidate_status(self, candidate_name: str, new_status: str) -> None:
+        df = st.session_state.repo_data["candidates"]
+        df.loc[df["Name"] == candidate_name, "Status"] = new_status
+        st.session_state.repo_data["candidates"] = df
+        
+        # Also update applications table if candidate is listed there
+        apps = st.session_state.repo_data["applications"]
+        if candidate_name in apps["Name"].values:
+            apps.loc[apps["Name"] == candidate_name, "Status"] = new_status
+            st.session_state.repo_data["applications"] = apps
+            
+        self.add_activity(f"Candidate status for {candidate_name} updated to '{new_status}'.")
 
     def get_applications(self) -> pd.DataFrame:
-        return self._data["applications"]
+        return st.session_state.repo_data["applications"]
 
     def get_jobs(self) -> pd.DataFrame:
-        return self._data["jobs"]
+        return st.session_state.repo_data["jobs"]
+
+    def update_job_status(self, job_title: str, new_status: str) -> None:
+        df = st.session_state.repo_data["jobs"]
+        df.loc[df["Job Title"] == job_title, "Status"] = new_status
+        st.session_state.repo_data["jobs"] = df
+        self.add_activity(f"Job posting '{job_title}' status set to '{new_status}'.")
+
+    def add_job(self, job_dict: dict) -> None:
+        df = st.session_state.repo_data["jobs"]
+        new_df = pd.concat([pd.DataFrame([job_dict]), df], ignore_index=True)
+        st.session_state.repo_data["jobs"] = new_df
+        self.add_activity(f"New job opening '{job_dict.get('Job Title')}' published.")
 
     def get_interviews(self) -> pd.DataFrame:
-        return self._data["interviews"]
+        return st.session_state.repo_data["interviews"]
+
+    def add_interview(self, interview_dict: dict) -> None:
+        df = st.session_state.repo_data["interviews"]
+        new_df = pd.concat([pd.DataFrame([interview_dict]), df], ignore_index=True)
+        st.session_state.repo_data["interviews"] = new_df
+        
+        # Automatically update candidate status to 'Interview' if candidate exists
+        cand_name = interview_dict.get("Candidate")
+        if cand_name:
+            self.update_candidate_status(cand_name, "Interview")
+            
+        self.add_activity(f"Interview scheduled for {cand_name} with {interview_dict.get('Interviewer')}.")
 
     def get_employees(self) -> pd.DataFrame:
-        return self._data["employees"]
+        return st.session_state.repo_data["employees"]
+
+    def get_activities(self) -> list[str]:
+        return st.session_state.activities
+
+    def add_activity(self, activity_text: str) -> None:
+        if "activities" not in st.session_state:
+            st.session_state.activities = []
+        st.session_state.activities.insert(0, activity_text)
+        if len(st.session_state.activities) > 15:
+            st.session_state.activities = st.session_state.activities[:15]
+

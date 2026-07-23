@@ -30,8 +30,8 @@ def init_state() -> None:
         st.session_state.page = "Dashboard"
 
 
-def render_sidebar(is_ai_active: bool) -> None:
-    """Render the sidebar navigation controls."""
+def render_sidebar(is_ai_active: bool) -> str:
+    """Render the sidebar navigation controls and return active page."""
     pages = [
         "Dashboard",
         "Candidates",
@@ -57,16 +57,25 @@ def render_sidebar(is_ai_active: bool) -> None:
         "Settings": "⚙️",
     }
 
+    # Handle programmatic navigation requests before rendering radio widget
+    if "pending_page" in st.session_state:
+        st.session_state.page = st.session_state.pop("pending_page")
+
+    current_page = st.session_state.get("page", "Dashboard")
+    current_index = pages.index(current_page) if current_page in pages else 0
+
     with st.sidebar:
         st.markdown("## 🤖 AI Talent Copilot")
         st.caption("Milestone 1 UI Prototype")
-        st.radio(
+        selected_page = st.radio(
             "Navigation",
             pages,
-            key="page",
+            index=current_index,
+            key="navigation_radio",
             format_func=lambda page: f"{icons[page]}  {page}",
             label_visibility="collapsed",
         )
+        st.session_state.page = selected_page
 
         st.divider()
         st.markdown("### Workspace")
@@ -75,6 +84,8 @@ def render_sidebar(is_ai_active: bool) -> None:
         else:
             st.warning("⚠️ Local Ollama (Phi-3) Offline\n\nRun `ollama run phi3` in your terminal to activate AI features.")
         st.caption(f"Last refreshed: {datetime.now().strftime('%d %b %Y, %I:%M %p')}")
+
+    return selected_page
 
 
 def main() -> None:
@@ -92,10 +103,9 @@ def main() -> None:
     is_ai_active = ollama.is_connected()
 
     # 4. Define and register view implementations (SOLID: LSP, OCP, DIP)
-    # The application routes navigation dynamically through the IView interface.
     views = {
         "Dashboard": DashboardView(candidate_repo=repo, interview_repo=repo),
-        "Candidates": CandidatesView(candidate_repo=repo),
+        "Candidates": CandidatesView(candidate_repo=repo, ollama_client=ollama),
         "Job Openings": JobOpeningsView(job_repo=repo),
         "Resume Screening": ResumeScreeningView(job_repo=repo, ollama_client=ollama),
         "Interview Management": InterviewManagementView(interview_repo=repo, candidate_repo=repo, ollama_client=ollama),
@@ -107,10 +117,9 @@ def main() -> None:
     }
 
     # 5. Render layout navigation controls
-    render_sidebar(is_ai_active)
+    active_page = render_sidebar(is_ai_active)
 
     # 6. Resolve and render the active view
-    active_page = st.session_state.page
     if active_page in views:
         views[active_page].render()
 

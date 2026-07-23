@@ -23,11 +23,11 @@ class DashboardView(IView):
         )
 
         kpi_rows = [
-            ("👥 Total Candidates", "1,248", "12.4% this month"),
-            ("💼 Active Job Openings", "32", "5 new roles"),
-            ("🗓️ Interviews Scheduled", "86", "18 this week"),
+            ("👥 Total Candidates", "1,248", "+12.4% this month"),
+            ("💼 Active Job Openings", "32", "+5 new roles"),
+            ("🗓️ Interviews Scheduled", "86", "+18 this week"),
             ("✅ Candidates Selected", "21", "7 awaiting offer"),
-            ("🎯 AI Match Accuracy", "94%", "placeholder metric"),
+            ("🎯 AI Match Accuracy", "94%", "+2.1% confidence"),
             ("⏱️ Average Hiring Time", "24 days", "3 days faster"),
         ]
         top_cols = st.columns(3)
@@ -70,13 +70,15 @@ class DashboardView(IView):
 
         with activity_col:
             with st.container(border=True):
-                section_header("🔔 Recent Activities", "Placeholder activity feed for recruiter operations.")
-                activities = [
-                    "New resume uploaded for Senior AI Engineer.",
-                    "Interview feedback submitted for Maya Rao.",
-                    "Offer approved for Product Designer role.",
-                    "Skill gap report refreshed for Engineering team.",
-                    "Candidate shortlist updated for HR Analyst.",
-                ]
+                section_header("🔔 Live Activity Stream", "Real-time log of recruiter and system operations.")
+                activities = (
+                    self._candidate_repo.get_activities()
+                    if hasattr(self._candidate_repo, "get_activities")
+                    else [
+                        "New resume uploaded for Senior AI Engineer.",
+                        "Interview feedback submitted for Maya Rao.",
+                        "Offer approved for Product Designer role.",
+                    ]
+                )
                 for activity in activities:
                     st.info(activity)

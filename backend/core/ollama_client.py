@@ -212,7 +212,10 @@ class OllamaClient:
         - Provide structured questions, each with a brief note explaining what to look for in the candidate's answer.
         - Keep the questions and notes concise and to-the-point to optimize local processing time.
         """
-        system_prompt = "You are a hiring manager. Generate concise, highly relevant interview questions."
+        system_prompt = (
+            "You are an expert hiring manager. Output ONLY the 5 structured interview questions and "
+            "evaluation notes. Do NOT include meta-commentary, system prompt echoes, or requirement lists at the end."
+        )
         return self.generate(prompt, system=system_prompt)
 
     def generate_growth_plan(self, team_name: str, current_skills: str, target_role: str) -> str:
